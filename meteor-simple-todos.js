@@ -39,6 +39,8 @@ if (Meteor.isClient) {
 
       Tasks.insert({
         text: event.target.task.value,
+        owner: Meteor.userId(),
+        username: Meteor.user().username,
         createdAt: new Date()
       });
 
@@ -58,6 +60,10 @@ if (Meteor.isClient) {
     'change .hide-completed input': function (event) {
       Session.set('hideCompleted', event.target.checked);
     }
+  });
+
+  Accounts.ui.config({
+    passwordSignupFields: 'USERNAME_ONLY'
   });
 
 }
