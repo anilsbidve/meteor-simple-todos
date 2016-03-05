@@ -37,25 +37,16 @@ if (Meteor.isClient) {
       // prevent form being submit
       event.preventDefault();
 
-      Tasks.insert({
-        text: event.target.task.value,
-        owner: Meteor.userId(),
-        username: Meteor.user().username,
-        createdAt: new Date()
-      });
+      Meteor.call('addTask', event.target.task.value);
 
       // clear input to add new task
       event.target.task.value = '';
     },
     'click .toggle-checked': function () {
-      Tasks.update(this._id, {
-        $set: {
-          checked: !this.checked
-        }
-      });
+      Meteor.call('setChecked', this._id, !this.checked);
     },
     'click .delete': function () {
-      Tasks.remove(this._id);
+      Meteor.call('deleteTask', this._id);
     },
     'change .hide-completed input': function (event) {
       Session.set('hideCompleted', event.target.checked);
@@ -67,3 +58,27 @@ if (Meteor.isClient) {
   });
 
 }
+
+Meteor.methods({
+  addTask: function (text) {
+    if (!Meteor.userId()) {
+      throw new Error('not-authorised');
+    }
+    Tasks.insert({
+      text: text,
+      owner: Meteor.userId(),
+      username: Meteor.user().username,
+      createdAt: new Date()
+    });
+  },
+  setChecked: function (taskId, checkStatus) {
+    Tasks.update(taskId, {
+      $set: {
+        checked: checkStatus
+      }
+    });
+  },
+  deleteTask: function (taskId) {
+    Tasks.remove(taskId);
+  }
+});
